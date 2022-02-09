@@ -1,0 +1,44 @@
+esphome:
+  name: lowpoly-butterfly
+
+esp32:
+  board: nodemcu-32s
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Lowpoly-Butterfly"
+    password: "SsBQuDL3bOYV"
+
+captive_portal:
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2813
+    pin: GPIO23
+    num_leds: 60
+    name: "Lowpoly Butterfly"
+
+esp32_touch:
+  setup_mode: true
+
+binary_sensor:
+  - platform: esp32_touch
+    name: "ESP32 Touch Pad GPIO33"
+    pin: GPIO33
+    threshold: 1000
