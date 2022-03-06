@@ -80,13 +80,9 @@ light:
 
             for(uint8_t ii = 0; ii < nsegments; ii++) {
               end = ranges[ii] + 1;
-
               float k = (float)(target_colors[ii] - start_colors[ii]) / (float)steps;
-
               segcolors[ii] = start_colors[ii] + k * progress;
-
               it.range(start, end) = Color(240, (uint8_t)segcolors[ii], 10);
-
               start = end;
             }
             progress++;
@@ -104,4 +100,33 @@ binary_sensor:
   - platform: esp32_touch
     name: "Power switch"
     pin: GPIO33
-    threshold: 1000
+    threshold: 450
+    on_release:
+      then:
+        lambda: |-
+            auto call = id(lowpoly).turn_on();
+
+            auto effects = id(lowpoly).get_effects();
+            std::string name = id(lowpoly).get_effect_name();
+
+            uint8_t i = 0;
+
+            if (name != "None") {
+              // There's an effect in progress, move to the next one
+              for (auto e : effects) {
+                i++;
+                if (e->get_name() == name) {
+                  break;
+                }
+              }
+            }
+            else {
+              i = 0;
+            }
+            if (i >= effects.size()) {
+              call.set_effect("None");
+            } else {
+              call.set_effect(effects[i]->get_name());
+            }
+            call.perform();
+            return;
