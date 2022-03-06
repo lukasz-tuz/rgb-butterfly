@@ -48,7 +48,7 @@ light:
           update_interval: 1ms
           lambda: |-
             // Time, in miliseconds, needed for each segment to transition to new random color
-            static const uint16_t segtrans = 1000;
+            static const uint16_t segtrans = 100;
 
             // Number of segments
             static const uint8_t nsegments = 9;
@@ -57,7 +57,7 @@ light:
             static const uint8_t ranges[nsegments] = {7, 14, 20, 33, 36, 50, 54, 59, 65};
 
             // Base, starting color
-            static const uint8_t base_color = 191;
+            static const uint8_t base_color = 127;
             
             // Number of steps in each transition
             static const uint16_t steps = segtrans / 1;
@@ -72,6 +72,10 @@ light:
             if (initial_run || progress == steps) {
               // Generate random new target color for each segment
               random_bytes(target_colors, nsegments);
+              // Clip values
+              for (uint8_t ii = 0; ii < nsegments; ii++) {
+                target_colors[ii] = min(target_colors[ii], (uint8_t)164);
+              }
               progress = 1;
             }          
 
@@ -82,7 +86,7 @@ light:
               end = ranges[ii] + 1;
               float k = (float)(target_colors[ii] - start_colors[ii]) / (float)steps;
               segcolors[ii] = start_colors[ii] + k * progress;
-              it.range(start, end) = Color(240, (uint8_t)segcolors[ii], 10);
+              it.range(start, end) = Color(220, (uint8_t)segcolors[ii], 0);
               start = end;
             }
             progress++;
