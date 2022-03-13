@@ -32,6 +32,16 @@ wifi:
 
 captive_portal:
 
+web_server:
+  port: 80
+
+switch:
+  - platform: restart
+    name: "Restart Light"
+
+# esp32_improv:
+#   authorizer: none
+
 light:
   - platform: partition
     name: "Lowpoly Butterfly"
@@ -49,7 +59,6 @@ light:
       - addressable_rainbow:
           name: "Rainbow"
           width: ${light_led_count}
-
       - addressable_twinkle:
           name: "Twinkle"
       - addressable_lambda:
@@ -112,7 +121,6 @@ light:
     num_leds: ${wing_led_count}
     name: "Right Wing"
     id: right_wing
-    internal: true
 
   - platform: neopixelbus
     type: GRB
@@ -121,12 +129,20 @@ light:
     num_leds: ${wing_led_count}
     name: "Left Wing"
     id: left_wing
-    internal: true
 
 esp32_touch:
   setup_mode: false
 
 binary_sensor:
+  - platform: esp32_touch
+    name: "On/Off"
+    pin: GPIO32
+    threshold: 450
+    on_release:
+      then:
+        - light.toggle:
+            id: lowpoly
+
   - platform: esp32_touch
     name: "Toggle Effect"
     pin: GPIO33
