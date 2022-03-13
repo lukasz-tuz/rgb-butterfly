@@ -55,16 +55,14 @@ light:
 
             // End indices for each segment
             static const uint8_t ranges[nsegments] = {7, 14, 20, 33, 36, 50, 54, 59, 65};
-
-            // Base, starting color
-            static const uint8_t base_color = 127;
             
             // Number of steps in each transition
             static const uint16_t steps = segtrans / 1;
 
             static uint16_t progress = 1;
             
-            static uint8_t start_colors[nsegments] = {base_color};
+            // Base, starting color
+            static uint8_t start_colors[nsegments] = {127};
             static uint8_t target_colors[nsegments] = {0};
 
             static float segcolors[nsegments] = {0};
