@@ -6,6 +6,12 @@ esp32:
   framework:
     type: arduino
 
+substitutions:
+  wing_led_count: '66'
+  segment_length: '65'
+  light_led_count: '131'
+
+
 # Enable logging
 logger:
 
@@ -27,20 +33,23 @@ wifi:
 captive_portal:
 
 light:
-  - platform: neopixelbus
-    type: GRB
-    variant: WS2813
-    pin: GPIO22
-    num_leds: 66
+  - platform: partition
     name: "Lowpoly Butterfly"
     id: lowpoly
+    segments:
+      - id: left_wing
+        from: 0
+        to: ${segment_length}
+      - id: right_wing
+        from: 0
+        to: ${segment_length}
     effects:
       - random:
           name: "Random"
       - addressable_rainbow:
           name: "Rainbow"
-          speed: 10
-          width: 66
+          width: ${light_led_count}
+
       - addressable_twinkle:
           name: "Twinkle"
       - addressable_lambda:
@@ -51,16 +60,17 @@ light:
             static const uint16_t segtrans = 100;
 
             // Number of segments
-            static const uint8_t nsegments = 9;
+            static const uint8_t nsegments = 18;
 
             // End indices for each segment
-            static const uint8_t ranges[nsegments] = {7, 14, 20, 33, 36, 50, 54, 59, 65};
-            
+            static const uint8_t ranges[nsegments] = {7, 14, 20, 33, 36, 50, 54, 59, 65, \
+                                                      72, 79, 85, 98, 101, 115, 119, 124, 130};
+
             // Number of steps in each transition
             static const uint16_t steps = segtrans / 1;
 
             static uint16_t progress = 1;
-            
+
             // Base, starting color
             static uint8_t start_colors[nsegments] = {127};
             static uint8_t target_colors[nsegments] = {0};
@@ -75,7 +85,7 @@ light:
                 target_colors[ii] = min(target_colors[ii], (uint8_t)164);
               }
               progress = 1;
-            }          
+            }
 
             uint8_t start = 0;
             uint8_t end = 0;
@@ -95,12 +105,30 @@ light:
 
             return;
 
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2813
+    pin: GPIO22
+    num_leds: ${wing_led_count}
+    name: "Right Wing"
+    id: right_wing
+    internal: true
+
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2813
+    pin: GPIO23
+    num_leds: ${wing_led_count}
+    name: "Left Wing"
+    id: left_wing
+    internal: true
+
 esp32_touch:
   setup_mode: false
 
 binary_sensor:
   - platform: esp32_touch
-    name: "Power switch"
+    name: "Toggle Effect"
     pin: GPIO33
     threshold: 450
     on_release:
