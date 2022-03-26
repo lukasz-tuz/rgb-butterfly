@@ -132,7 +132,7 @@ light:
 
 esp32_touch:
   setup_mode: true
-  iir_filter: 15ms
+  iir_filter: 30ms
   low_voltage_reference: 0.5V
   high_voltage_reference: 2.7V
   voltage_attenuation: 1.5V
@@ -141,7 +141,7 @@ binary_sensor:
   - platform: esp32_touch
     name: "On/Off"
     pin: GPIO32
-    threshold: 1200
+    threshold: 1100
     on_release:
       then:
         - light.toggle:
@@ -150,7 +150,7 @@ binary_sensor:
   - platform: esp32_touch
     name: "Toggle Effect"
     pin: GPIO33
-    threshold: 1200
+    threshold: 1100
     on_release:
       then:
         lambda: |-
