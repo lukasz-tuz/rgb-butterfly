@@ -7,10 +7,8 @@ esp32:
     type: arduino
 
 substitutions:
-  wing_led_count: '66'
-  segment_length: '65'
-  light_led_count: '131'
-
+  num_leds: '66'
+  max_led_idx: '65'
 
 # Enable logging
 logger:
@@ -49,16 +47,16 @@ light:
     segments:
       - id: right_wing
         from: 0
-        to: ${segment_length}
+        to: ${max_led_idx}
       - id: left_wing
         from: 0
-        to: ${segment_length}
+        to: ${max_led_idx}
     effects:
       - random:
           name: "Random"
       - addressable_rainbow:
           name: "Rainbow"
-          width: ${wing_led_count}
+          width: ${num_leds}
       - addressable_twinkle:
           name: "Twinkle"
       - addressable_lambda:
@@ -72,8 +70,8 @@ light:
             static const uint8_t nsegments = 18;
 
             // End indices for each segment
-            static const uint8_t ranges[nsegments] = {8, 15, 21, 34, 37, 51, 55, 60, 66, \
-                                                      73, 80, 86, 99, 102, 116, 120, 125, 131};
+            static const uint8_t ranges[nsegments] = {7, 14, 20, 33, 36, 50, 54, 59, 65, \
+                                                      72, 79, 85, 98, 101, 115, 119, 124, 131};
 
             // Number of steps in each transition
             static const uint16_t steps = segtrans / 1;
@@ -118,7 +116,7 @@ light:
     rgb_order: GRB
     chipset: WS2813
     pin: GPIO22
-    num_leds: ${wing_led_count}
+    num_leds: ${num_leds}
     name: "Right Wing"
     id: right_wing
     internal: true
@@ -127,19 +125,23 @@ light:
     type: GRB
     variant: WS2813
     pin: GPIO23
-    num_leds: ${wing_led_count}
+    num_leds: ${num_leds}
     name: "Left Wing"
     id: left_wing
     internal: true
 
 esp32_touch:
-  setup_mode: false
+  setup_mode: true
+  iir_filter: 15ms
+  low_voltage_reference: 0.5V
+  high_voltage_reference: 2.7V
+  voltage_attenuation: 1.5V
 
 binary_sensor:
   - platform: esp32_touch
     name: "On/Off"
     pin: GPIO32
-    threshold: 300
+    threshold: 1200
     on_release:
       then:
         - light.toggle:
@@ -148,7 +150,7 @@ binary_sensor:
   - platform: esp32_touch
     name: "Toggle Effect"
     pin: GPIO33
-    threshold: 300
+    threshold: 1200
     on_release:
       then:
         lambda: |-
