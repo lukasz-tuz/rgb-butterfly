@@ -52,8 +52,6 @@ light:
         from: 0
         to: ${max_led_idx}
     effects:
-      - random:
-          name: "Random"
       - addressable_rainbow:
           name: "Rainbow"
           width: ${num_leds}
@@ -132,7 +130,7 @@ light:
 
 esp32_touch:
   setup_mode: true
-  iir_filter: 30ms
+  iir_filter: 15ms
   low_voltage_reference: 0.5V
   high_voltage_reference: 2.7V
   voltage_attenuation: 1.5V
@@ -142,15 +140,44 @@ binary_sensor:
     name: "On/Off"
     pin: GPIO32
     threshold: 1100
+    filters:
+      - delayed_on_off: 100ms
     on_release:
       then:
-        - light.toggle:
-            id: lowpoly
+        # - light.toggle:
+        #     id: lowpoly
+        lambda: |-
+          static const int levels = 5;
+          static const float brightness_levels[levels] = {0.0, 0.5, 0.65, 0.8, 1.0};
+
+          static int current_level = 0;
+
+          current_level = (current_level + 1) % (levels);
+
+          auto effects = id(lowpoly).get_effects();
+          std::string effect_name = id(lowpoly).get_effect_name();
+
+          if (current_level > 0) {
+            auto call = id(lowpoly).turn_on();
+            float brightness = brightness_levels[current_level];
+            call.set_brightness(brightness);
+            if (effect_name == "None") {
+              call.set_rgb(1.0, 1.0, 1.0);
+            }
+            call.perform();
+          }
+          else {
+            auto call = id(lowpoly).turn_off();
+            call.perform();
+          }
+          return;
 
   - platform: esp32_touch
     name: "Toggle Effect"
     pin: GPIO33
     threshold: 1100
+    filters:
+      - delayed_on_off: 100ms
     on_release:
       then:
         lambda: |-
@@ -171,10 +198,13 @@ binary_sensor:
               }
             }
             else {
+              // no effects in progress
               i = 0;
             }
             if (i >= effects.size()) {
               call.set_effect("None");
+              call.set_brightness(1.0);
+              call.set_rgb(1.0, 1.0, 1.0);
             } else {
               call.set_effect(effects[i]->get_name());
             }
