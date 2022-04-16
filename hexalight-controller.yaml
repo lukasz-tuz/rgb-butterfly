@@ -159,34 +159,40 @@ binary_sensor:
     threshold: 1100
     filters:
       - delayed_on_off: 100ms
-    on_release:
-      then:
-        lambda: |-
-          static const int levels = 5;
-          static const float brightness_levels[levels] = {0.0, 0.5, 0.65, 0.8, 1.0};
+    on_click:
+      - min_length: 800ms
+        max_length: 5000ms
+        then:
+          - light.turn_off: lowpoly
+      - min_length: 100ms
+        max_length: 700ms
+        then:
+          lambda: |-
+            static const int levels = 5;
+            static const float brightness_levels[levels] = {0.0, 0.5, 0.65, 0.8, 1.0};
 
-          static int current_level = 0;
+            static int current_level = 0;
 
-          current_level = (current_level + 1) % (levels);
-          
-          auto effects = id(lowpoly).get_effects();
-          std::string effect_name = id(lowpoly).get_effect_name();
-          if (effect_name == "None") {
-            effect_name = effects.front()->get_name();
-          }
+            current_level = (current_level + 1) % (levels);
 
-          if (current_level > 0) {
-            auto call = id(lowpoly).turn_on();
-            float brightness = brightness_levels[current_level];
-            call.set_brightness(brightness);
-            call.set_effect(effect_name);
-            call.perform();
-          }
-          else {
-            auto call = id(lowpoly).turn_off();
-            call.perform();
-          }
-          return;
+            auto effects = id(lowpoly).get_effects();
+            std::string effect_name = id(lowpoly).get_effect_name();
+            if (effect_name == "None") {
+              effect_name = effects.front()->get_name();
+            }
+
+            if (current_level > 0) {
+              auto call = id(lowpoly).turn_on();
+              float brightness = brightness_levels[current_level];
+              call.set_brightness(brightness);
+              call.set_effect(effect_name);
+              call.perform();
+            }
+            else {
+              auto call = id(lowpoly).turn_off();
+              call.perform();
+            }
+            return;
 
   - platform: esp32_touch
     name: "Toggle Effect"
