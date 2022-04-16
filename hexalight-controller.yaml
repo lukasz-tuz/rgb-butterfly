@@ -9,6 +9,7 @@ esp32:
 substitutions:
   num_leds: '66'
   max_led_idx: '65'
+  gamma_correct: '1.5'
 
 # Enable logging
 logger:
@@ -44,6 +45,8 @@ light:
   - platform: partition
     name: "Lowpoly Butterfly"
     id: lowpoly
+    restore_mode: RESTORE_AND_OFF
+    gamma_correct: ${gamma_correct}
     segments:
       - id: right_wing
         from: 0
@@ -57,6 +60,13 @@ light:
           width: ${num_leds}
       - addressable_twinkle:
           name: "Twinkle"
+      - addressable_lambda:
+          name: "Reading Light"
+          update_interval: 1s
+          lambda: |-
+            it.all()= Color(255, 170, 160);
+            return;
+
       - addressable_lambda:
           name: "Voronoi"
           update_interval: 1ms
@@ -111,6 +121,7 @@ light:
             return;
 
   - platform: fastled_clockless
+    gamma_correct: ${gamma_correct}
     rgb_order: GRB
     chipset: WS2813
     pin: GPIO22
@@ -120,6 +131,7 @@ light:
     internal: true
 
   - platform: neopixelbus
+    gamma_correct: ${gamma_correct}
     type: GRB
     variant: WS2813
     pin: GPIO23
@@ -129,7 +141,7 @@ light:
     internal: true
 
 esp32_touch:
-  setup_mode: true
+  setup_mode: false
   iir_filter: 15ms
   low_voltage_reference: 0.5V
   high_voltage_reference: 2.7V
@@ -144,8 +156,6 @@ binary_sensor:
       - delayed_on_off: 100ms
     on_release:
       then:
-        # - light.toggle:
-        #     id: lowpoly
         lambda: |-
           static const int levels = 5;
           static const float brightness_levels[levels] = {0.0, 0.5, 0.65, 0.8, 1.0};
@@ -161,9 +171,6 @@ binary_sensor:
             auto call = id(lowpoly).turn_on();
             float brightness = brightness_levels[current_level];
             call.set_brightness(brightness);
-            if (effect_name == "None") {
-              call.set_rgb(1.0, 1.0, 1.0);
-            }
             call.perform();
           }
           else {
@@ -191,22 +198,13 @@ binary_sensor:
             if (name != "None") {
               // There's an effect in progress, move to the next one
               for (auto e : effects) {
-                i++;
+                ++i %= effects.size();
                 if (e->get_name() == name) {
                   break;
                 }
               }
             }
-            else {
-              // no effects in progress
-              i = 0;
-            }
-            if (i >= effects.size()) {
-              call.set_effect("None");
-              call.set_brightness(1.0);
-              call.set_rgb(1.0, 1.0, 1.0);
-            } else {
-              call.set_effect(effects[i]->get_name());
-            }
+
+            call.set_effect(effects[i]->get_name());
             call.perform();
             return;
