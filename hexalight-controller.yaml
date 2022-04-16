@@ -1,15 +1,19 @@
+substitutions:
+  name: "lowpoly-butterfly"
+  num_leds: '66'
+  max_led_idx: '65'
+  gamma_correct: '1.5'
+
 esphome:
-  name: lowpoly-butterfly
+  name: ${name}
+  project:
+    name: "hexalight.lowpoly_butterfly"
+    version: "1.0.0"
 
 esp32:
   board: esp32dev
   framework:
     type: arduino
-
-substitutions:
-  num_leds: '66'
-  max_led_idx: '65'
-  gamma_correct: '1.5'
 
 # Enable logging
 logger:
@@ -163,14 +167,18 @@ binary_sensor:
           static int current_level = 0;
 
           current_level = (current_level + 1) % (levels);
-
+          
           auto effects = id(lowpoly).get_effects();
           std::string effect_name = id(lowpoly).get_effect_name();
+          if (effect_name == "None") {
+            effect_name = effects.front()->get_name();
+          }
 
           if (current_level > 0) {
             auto call = id(lowpoly).turn_on();
             float brightness = brightness_levels[current_level];
             call.set_brightness(brightness);
+            call.set_effect(effect_name);
             call.perform();
           }
           else {
