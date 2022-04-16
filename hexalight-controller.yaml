@@ -49,7 +49,7 @@ light:
   - platform: partition
     name: "Lowpoly Butterfly"
     id: lowpoly
-    restore_mode: RESTORE_AND_OFF
+    restore_mode: ALWAYS_OFF
     gamma_correct: ${gamma_correct}
     segments:
       - id: right_wing
@@ -126,6 +126,7 @@ light:
 
   - platform: fastled_clockless
     gamma_correct: ${gamma_correct}
+    restore_mode: ALWAYS_OFF
     rgb_order: GRB
     chipset: WS2813
     pin: GPIO22
@@ -136,6 +137,7 @@ light:
 
   - platform: neopixelbus
     gamma_correct: ${gamma_correct}
+    restore_mode: ALWAYS_OFF
     type: GRB
     variant: WS2813
     pin: GPIO23
