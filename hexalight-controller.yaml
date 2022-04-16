@@ -59,18 +59,17 @@ light:
         from: 0
         to: ${max_led_idx}
     effects:
-      - addressable_rainbow:
-          name: "Rainbow"
-          width: ${num_leds}
-      - addressable_twinkle:
-          name: "Twinkle"
       - addressable_lambda:
           name: "Reading Light"
           update_interval: 1s
           lambda: |-
             it.all()= Color(255, 170, 160);
             return;
-
+      - addressable_rainbow:
+          name: "Rainbow"
+          width: ${num_leds}
+      - addressable_twinkle:
+          name: "Twinkle"
       - addressable_lambda:
           name: "Voronoi"
           update_interval: 1ms
