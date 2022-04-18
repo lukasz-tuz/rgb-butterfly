@@ -1,5 +1,5 @@
 substitutions:
-  name: "lowpoly-butterfly"
+  name: "kids-room-bedlight"
   num_leds: '66'
   max_led_idx: '65'
   gamma_correct: '1.5'
@@ -7,7 +7,7 @@ substitutions:
 esphome:
   name: ${name}
   project:
-    name: "hexalight.lowpoly_butterfly"
+    name: "hexalight.lowpoly-butterfly"
     version: "1.0.0"
 
 esp32:
@@ -35,8 +35,8 @@ wifi:
 
 captive_portal:
 
-web_server:
-  port: 80
+# web_server:
+#   port: 80
 
 switch:
   - platform: restart
