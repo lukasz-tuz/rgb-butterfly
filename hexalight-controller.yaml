@@ -47,7 +47,7 @@ switch:
 
 light:
   - platform: partition
-    name: "Lowpoly Butterfly"
+    name: ${name}
     id: lowpoly
     restore_mode: ALWAYS_OFF
     gamma_correct: ${gamma_correct}
@@ -197,7 +197,7 @@ binary_sensor:
   - platform: esp32_touch
     name: "Toggle Effect"
     pin: GPIO33
-    threshold: 1100
+    threshold: 1050
     filters:
       - delayed_on_off: 100ms
     on_release:
