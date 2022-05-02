@@ -31,7 +31,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Lowpoly-Butterfly"
-    password: "SsBQuDL3bOYV"
+    password: !secret ap_password
 
 captive_portal:
 
@@ -156,20 +156,20 @@ binary_sensor:
   - platform: esp32_touch
     name: "On/Off"
     pin: GPIO32
-    threshold: 1100
+    threshold: 1150
     filters:
-      - delayed_on_off: 100ms
+      - delayed_on_off: 50ms
     on_click:
       - min_length: 800ms
         max_length: 5000ms
         then:
           - light.turn_off: lowpoly
-      - min_length: 100ms
+      - min_length: 50ms
         max_length: 700ms
         then:
           lambda: |-
             static const int levels = 5;
-            static const float brightness_levels[levels] = {0.0, 0.5, 0.65, 0.8, 1.0};
+            static const float brightness_levels[levels] = {0.0, 0.15, 0.45, 0.8, 1.0};
 
             static int current_level = 0;
 
@@ -200,7 +200,13 @@ binary_sensor:
     threshold: 1050
     filters:
       - delayed_on_off: 100ms
-    on_release:
+    on_click:
+    - min_length: 800ms
+      max_length: 5000ms
+      then:
+        - light.turn_off: lowpoly
+    - min_length: 50ms
+      max_length: 700ms
       then:
         lambda: |-
             auto call = id(lowpoly).turn_on();
