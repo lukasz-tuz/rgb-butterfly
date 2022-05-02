@@ -1,2 +1,3 @@
-# hexalight-controller
-Controller for hexalight panels.
+# lowpolylight-controller
+
+Controller for lowpolylight panels.
