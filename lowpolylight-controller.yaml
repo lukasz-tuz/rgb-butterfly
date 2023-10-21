@@ -1,7 +1,7 @@
 substitutions:
   name: "kids-room-bedlight"
-  num_leds: '66'
-  max_led_idx: '65'
+  num_leds: '65'
+  max_led_idx: '64'
   gamma_correct: '1.5'
 
 esphome:
@@ -17,7 +17,7 @@ esp32:
 
 # Enable logging
 logger:
-
+  
 # Enable Home Assistant API
 api:
 
@@ -35,15 +35,9 @@ wifi:
 
 captive_portal:
 
-# web_server:
-#   port: 80
-
 switch:
   - platform: restart
     name: "Restart Light"
-
-# esp32_improv:
-#   authorizer: none
 
 light:
   - platform: partition
@@ -63,66 +57,80 @@ light:
           name: "Reading Light"
           update_interval: 1s
           lambda: |-
-            it.all()= Color(255, 170, 160);
+            it.all()= Color(255, 150, 50);
             return;
       - addressable_rainbow:
           name: "Rainbow"
           width: ${num_leds}
-      - addressable_twinkle:
-          name: "Twinkle"
       - addressable_lambda:
-          name: "Voronoi"
+          name: "Rainbow Segments"
           update_interval: 1ms
           lambda: |-
-            // Time, in miliseconds, needed for each segment to transition to new random color
-            static const uint16_t segtrans = 200;
-
-            // Number of segments
             static const uint8_t nsegments = 18;
+            static const uint8_t speed = 5;
 
-            // End indices for each segment
-            static const uint8_t ranges[nsegments] = {7, 14, 20, 33, 36, 50, 54, 59, 65, \
-                                                      72, 79, 85, 98, 101, 115, 119, 124, 131};
+            // Count of LEDs in each of the segments
+            static const uint8_t segments[nsegments] = {7, 6, 5, 12, 2, 13, 3, 4, 5, 6, 6, 5, 12, 2, 13, 5, 4, 3};
+            static uint16_t colors[nsegments];
 
-            // Number of steps in each transition
-            static const uint16_t steps = segtrans / 1;
-
-            static uint16_t progress = 1;
-
-            // Base, starting color
-            static uint8_t start_colors[nsegments] = {127};
-            static uint8_t target_colors[nsegments] = {0};
-
-            static float segcolors[nsegments] = {0};
-
-            if (initial_run || progress == steps) {
-              // Generate random new target color for each segment
-              random_bytes(target_colors, nsegments);
-              // Clip values
-              for (uint8_t ii = 0; ii < nsegments; ii++) {
-                target_colors[ii] = min(target_colors[ii], (uint8_t)164);
+            if (initial_run) {
+              for (int i = 0; i < nsegments; i++) {
+                // Initialize to a random color
+                colors[i] = (uint16_t)(random_uint32() & 0x0000FFFF);
               }
-              progress = 1;
             }
 
-            uint8_t start = 0;
-            uint8_t end = 0;
-
-            for(uint8_t ii = 0; ii < nsegments; ii++) {
-              end = ranges[ii] + 1;
-              float k = (float)(target_colors[ii] - start_colors[ii]) / (float)steps;
-              segcolors[ii] = start_colors[ii] + k * progress;
-              it.range(start, end) = Color(220, (uint8_t)segcolors[ii], 0);
+            ESPHSVColor hsv(0, 240, 255);
+            uint16_t start = 0;
+            for (uint8_t i = 0; i < nsegments; i++) {
+              uint16_t end = start + segments[i] + 1;
+              colors[i] = (colors[i] + speed) % 0xFFFF;
+              hsv.hue = (colors[i] >> 8) & 0xFF;
+              it.range(start, end) = hsv.to_rgb();
               start = end;
             }
-            progress++;
+            return;
+      - addressable_lambda:
+          name: "Ice"
+          update_interval: 1ms
+          lambda: |-
+            #define INT_TO_FIXED16(n) (n << 8)
+            static const uint8_t nsegments = 18;
+            static const uint8_t speed = 5;
 
-            if (progress == steps) {
-              memcpy(start_colors, target_colors, nsegments);
+            // Count of LEDs in each of the segments
+            static const uint8_t segments[nsegments] = {7, 6, 5, 12, 2, 13, 3, 4, 5, 6, 6, 5, 12, 2, 13, 5, 4, 3};
+            static uint16_t colors[nsegments];
+            
+            static const uint16_t min_hue = INT_TO_FIXED16(142);
+            static const uint16_t hue_range = INT_TO_FIXED16(71);
+            static const uint16_t max_hue = min_hue + hue_range;
+
+            if (initial_run) {
+              // Initialize colors to orange-ish color, 45 degrees on hue scale,
+              // 1/8th of the full range.
+              // Assuming colors are represented by fixed point hue value with
+              // 8 bits of fractional part, 45 deg would correspond to 0x2000.
+              // We do want a bit of jitter around the middle value.
+              for (uint8_t i = 0; i < nsegments; i++) {
+                uint16_t offset = (random_uint32() & 0xFFFF) % hue_range;
+                colors[i] = min_hue + offset;
+              }
             }
 
+            ESPHSVColor hsv(0, 240, 255);
+            uint16_t start = 0;
+            for (uint8_t i = 0; i < nsegments; i++) {
+              uint16_t end = start + segments[i] + 1;
+              
+              colors[i] = (colors[i] + speed) % max_hue;
+              if (colors[i] < min_hue) colors[i] = min_hue;
+              hsv.hue = (colors[i] >> 8) & UINT8_MAX;
+              
+              it.range(start, end) = hsv.to_rgb();
+              start = end;
+            }
             return;
-
   - platform: fastled_clockless
     gamma_correct: ${gamma_correct}
     restore_mode: ALWAYS_OFF
