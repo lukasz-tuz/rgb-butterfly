@@ -67,10 +67,11 @@ light:
           update_interval: 1ms
           lambda: |-
             static const uint8_t nsegments = 18;
-            static const uint8_t speed = 5;
+            static const uint8_t speed = 10;
 
             // Count of LEDs in each of the segments
-            static const uint8_t segments[nsegments] = {7, 6, 5, 12, 2, 13, 3, 4, 5, 6, 6, 5, 12, 2, 13, 5, 4, 3};
+            static const uint8_t segments[nsegments] = {6, 6, 5, 12, 2, 13, 3, 4, 5,\
+                                                        7, 6, 5, 12, 2, 13, 5, 4, 3};
             static uint16_t colors[nsegments];
 
             if (initial_run) {
@@ -96,14 +97,15 @@ light:
           lambda: |-
             #define INT_TO_FIXED16(n) (n << 8)
             static const uint8_t nsegments = 18;
-            static const uint8_t speed = 5;
+            static const uint8_t speed = 2;
 
             // Count of LEDs in each of the segments
-            static const uint8_t segments[nsegments] = {7, 6, 5, 12, 2, 13, 3, 4, 5, 6, 6, 5, 12, 2, 13, 5, 4, 3};
+            static const uint8_t segments[nsegments] = {6, 6, 5, 12, 2, 13, 3, 4, 5,\
+                                                        7, 6, 5, 12, 2, 13, 5, 4, 3};
             static uint16_t colors[nsegments];
             
             static const uint16_t min_hue = INT_TO_FIXED16(142);
-            static const uint16_t hue_range = INT_TO_FIXED16(71);
+            static const uint16_t hue_range = INT_TO_FIXED16(81);
             static const uint16_t max_hue = min_hue + hue_range;
 
             if (initial_run) {
