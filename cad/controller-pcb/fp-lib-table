@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name "LT3591")(type "KiCad")(uri "/home/lukasztuz/dev/cad/capricorn")(options "")(descr ""))
+  (lib (name "ESP32-WROOM-DA-N16")(type "KiCad")(uri "/home/lukasztuz/dev/cad/ESP32-WROOM-DA-N16")(options "")(descr ""))
+  (lib (name "TE-Connectivity")(type "KiCad")(uri "/home/lukasztuz/dev/cad/1-1954289-2")(options "")(descr ""))
+)

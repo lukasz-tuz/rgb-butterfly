@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name "LT3591")(type "KiCad")(uri "/home/lukasztuz/dev/cad/capricorn/LT3591.kicad_sym")(options "")(descr ""))
+  (lib (name "ESP32-WROOM-DA-N16")(type "KiCad")(uri "/home/lukasztuz/dev/cad/ESP32-WROOM-DA-N16/ESP32-WROOM-DA-N16.kicad_sym")(options "")(descr ""))
+  (lib (name "TE-Connectivity")(type "KiCad")(uri "/home/lukasztuz/dev/cad/1-1954289-2/1-1954289-2.kicad_sym")(options "")(descr ""))
+)
